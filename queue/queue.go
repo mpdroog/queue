@@ -64,26 +64,30 @@ func Add(cmd string, msgid string) {
 		Type: cmdType[cmd],
 		Update: make(chan string, 1),
 	}
-	replyTimeout := time.After(config.Timeout)
 
 	done := false
-	// Find ourselves a queue
+	replyTimeout := time.After(config.C.Queues[j.Type.String()].ReplyTimeoutD)
 	steps := config.C.Queues[j.Type.String()].Steps
+
 Processing:
 	for i := 0; i < len(steps); i++ {
 		var serverTimeout <- chan time.Time
 		for _, group := range Q[steps[i]] {
-			if group.Hashfeed != nil && group.Hashfeed.Match(j.Hash) {
-				if availQueue(group) {
-					fmt.Printf("[%s][%s] Try\n", msgid, group.Hostname)
-					group.Queue <- j
-					j.Server = i
+			if group.Hashfeed != nil {
+				if group.Hashfeed.Match(j.Hash) {
+					if availQueue(group) {
+						fmt.Printf("[%s][%s] Try\n", msgid, group.Hostname)
+						group.Queue <- j
+						j.Server = i
 
-					serverTimeout = time.After(group.Timeout)
+						serverTimeout = time.After(group.Timeout)
 
-					// We used 'for' to 'randomly' pick a server
-					// from the group
-					break
+						// We used 'for' to 'randomly' pick a server
+						// from the group
+						break
+					} else {
+						fmt.Printf("[%s] Queue too full\n", msgid)
+					}
 				}
 			} else {
 				if availQueue(group) {
@@ -96,6 +100,8 @@ Processing:
 					// We used 'for' to 'randomly' pick a server
 					// from the group
 					break
+				} else {
+					fmt.Printf("[%s] Queue too full\n", msgid)
 				}
 			}
 		}
@@ -104,7 +110,7 @@ Processing:
 		select {
 			case reply := <-j.Update:
 				if reply == "DONE" {
-					fmt.Printf("[%s] Finished\n", msgid, reply)
+					fmt.Printf("[%s] Finished\n", msgid)
 					done = true
 					break Processing
 				} else {
@@ -117,8 +123,9 @@ Processing:
 				break Processing
 		}
 
-		if !done {
-			fmt.Printf("Client cmd lost")
-		}
 	}
+	if !done {
+		fmt.Printf("[%s] Client cmd lost\n", msgid)
+	}
+
 }
