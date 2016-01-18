@@ -1,0 +1,47 @@
+ReplyTimeout="20s"
+
+[servers]
+	[servers.spool1]
+		Type="storage"
+		Hostname="spool1.usenet.farm:119"
+		Hashfeed="1-120/360:8"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+		SkipQueue=1
+		TestDelay="1s"
+	[servers.spool2]
+		Type="storage"
+		Hostname="spool2.usenet.farm:119"
+		Hashfeed="120-360/360:8"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+	[servers.xsnews]
+		Type="xsnews"
+		Hostname="reader.xsnews.nl:119"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+	[servers.highwinds]
+		Type="highwinds"
+		Hostname="reader.highwinds.com:119"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+	[servers.rasti]
+		Type="archive"
+		Hostname="xx.com:119"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+	[servers.pasti]
+		Type="archive"
+		Hostname="yy.com:119"
+		Connections=2
+		Queue=2
+		Timeout="10s"
+
+[queues]
+	[queues.storage]
+		Steps=["storage", "xsnews", "highwinds", "archive"]
