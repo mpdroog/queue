@@ -1,5 +1,3 @@
-ReplyTimeout="20s"
-
 [servers]
 	[servers.spool1]
 		Type="storage"
@@ -44,4 +42,5 @@ ReplyTimeout="20s"
 
 [queues]
 	[queues.storage]
+		ReplyTimeout="20s"
 		Steps=["storage", "xsnews", "highwinds", "archive"]
