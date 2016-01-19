@@ -48,7 +48,6 @@ func Test() error {
 // Check if queue is available
 func availQueue(s Server) bool {
 	if cap(s.Queue) - len(s.Queue) <= s.SkipQueue {
-		fmt.Printf(" Skip queue, too full\n")
 		return false
 	}
 	return true
@@ -89,7 +88,7 @@ Processing:
 						// from the group
 						break
 					} else {
-						fmt.Printf("[%s] Queue too full\n", msgid)
+						fmt.Printf("[%s][%s] Queue too full\n", msgid, group.Hostname)
 					}
 				}
 			} else {
@@ -104,7 +103,7 @@ Processing:
 					// from the group
 					break
 				} else {
-					fmt.Printf("[%s] Queue too full\n", msgid)
+					fmt.Printf("[%s][%s] Queue too full\n", msgid, group.Hostname)
 				}
 			}
 		}
