@@ -71,9 +71,11 @@ func Add(cmd string, msgid string) {
 	steps := config.C.Queues[j.Type.String()].Steps
 
 	wg.Add(1)
+	s.Added++
 Processing:
 	for i := 0; i < len(steps); i++ {
 		var serverTimeout <- chan time.Time
+		isQueued := false
 		for _, group := range Q[steps[i]] {
 			valid := false
 			if group.Hashfeed != nil {
@@ -89,39 +91,51 @@ Processing:
 					fmt.Printf("[%s][%s] Try\n", msgid, group.Hostname)
 					group.Queue <- j
 					j.Server = i
+					s.QueueAdded++
 
 					serverTimeout = time.After(group.Timeout)
 
 					// We used 'for' to 'randomly' pick a server
 					// from the group
+					isQueued = true
 					break
 				} else {
 					fmt.Printf("[%s][%s] Queue too full\n", msgid, group.Hostname)
+					s.Full++
 				}
 			}
 		}
 
-		// Now wait for a response
-		select {
-			case reply := <-j.Update:
-				if reply == "DONE" {
-					fmt.Printf("[%s] Finished\n", msgid)
-					done = true
+		if isQueued {
+			// Now wait for a response
+			select {
+				case reply := <-j.Update:
+					if reply == "DONE" {
+						fmt.Printf("[%s] Finished\n", msgid)
+						done = true
+						s.Success++
+						break Processing
+					} else {
+						fmt.Printf("[%s] Error: %s (trying on next)\n", msgid, reply)
+						s.Error++
+					}
+				case <- serverTimeout:
+					fmt.Printf("[%s] Server Timeout (trying on next)\n", msgid)
+					s.Timeout++
+
+				case <- replyTimeout:
+					fmt.Printf("[%s] Reply timeout (dropping request)\n", msgid)
 					break Processing
-				} else {
-					fmt.Printf("[%s] Error: %s (trying on next)\n", msgid, reply)
-				}
-			case <- serverTimeout:
-				fmt.Printf("[%s] Server Timeout (trying on next)\n", msgid)
-			case <- replyTimeout:
-				fmt.Printf("[%s] Reply timeout (dropping request)\n", msgid)
-				break Processing
+			}
 		}
 
 	}
 	if !done {
 		fmt.Printf("[%s] Client cmd lost\n", msgid)
+		s.Lost++
 	}
+	s.Processed++
+
 	wg.Done()
 }
 

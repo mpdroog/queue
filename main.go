@@ -65,4 +65,5 @@ func main() {
     }
 
     queue.Wait()
+    fmt.Printf("Perf %+v", queue.Stats())
 }
