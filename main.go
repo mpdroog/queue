@@ -57,10 +57,12 @@ func main() {
     		// Skip line
     		continue
     	}
-        queue.Add(tok[0], tok[1])
+        go queue.Add(tok[0], tok[1])
     }
 
     if e := scanner.Err(); e != nil {
         panic(e)
     }
+
+    queue.Wait()
 }
