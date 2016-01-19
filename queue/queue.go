@@ -65,6 +65,7 @@ func Add(cmd string, msgid string) {
 		Type: cmdType[cmd],
 		Update: make(chan string, 1),
 	}
+	defer close(j.Update)
 
 	done := false
 	replyTimeout := time.After(config.C.Queues[j.Type.String()].ReplyTimeoutD)
