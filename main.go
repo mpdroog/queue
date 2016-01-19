@@ -1,15 +1,15 @@
 package main
 
 import (
-	"strings"
-	"rqueue/config"
-	"rqueue/worker"
-	"rqueue/queue"
-	"fmt"
-	"flag"
-	"os"
 	"bufio"
+	"flag"
+	"fmt"
+	"os"
+	"rqueue/config"
+	"rqueue/queue"
+	"rqueue/worker"
 	"runtime"
+	"strings"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 	}
 	tests, e := os.Open(test)
 	if e != nil {
-		panic(e)		
+		panic(e)
 	}
 	defer tests.Close()
 
@@ -50,20 +50,20 @@ func main() {
 
 	// fake traffic
 	scanner := bufio.NewScanner(tests)
-    for scanner.Scan() {
-    	msgid := scanner.Text()
-    	tok := strings.Split(msgid, " ")
-    	if len(tok) != 2 {
-    		// Skip line
-    		continue
-    	}
-        go queue.Add(tok[0], tok[1])
-    }
+	for scanner.Scan() {
+		msgid := scanner.Text()
+		tok := strings.Split(msgid, " ")
+		if len(tok) != 2 {
+			// Skip line
+			continue
+		}
+		go queue.Add(tok[0], tok[1])
+	}
 
-    if e := scanner.Err(); e != nil {
-        panic(e)
-    }
+	if e := scanner.Err(); e != nil {
+		panic(e)
+	}
 
-    queue.Wait()
-    fmt.Printf("Perf %+v", queue.Stats())
+	queue.Wait()
+	fmt.Printf("Perf %+v", queue.Stats())
 }

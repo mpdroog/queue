@@ -1,16 +1,16 @@
 package queue
 
 import (
-	"time"
 	"crypto/md5"
-	"rqueue/config"
 	"fmt"
+	"rqueue/config"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
-	Q map[string][]Server
+	Q  map[string][]Server
 	wg sync.WaitGroup
 )
 
@@ -30,12 +30,12 @@ func New(opts config.Server) (chan Job, error) {
 	}
 
 	q := make(chan Job, opts.Queue)
-	Q[ opts.Type ] = append(Q[ opts.Type ], Server{
-		Hostname: opts.Hostname,
-		Hashfeed: feed,
-		Timeout: timeout,
+	Q[opts.Type] = append(Q[opts.Type], Server{
+		Hostname:  opts.Hostname,
+		Hashfeed:  feed,
+		Timeout:   timeout,
 		SkipQueue: opts.SkipQueue,
-		Queue: q,
+		Queue:     q,
 	})
 	return q, nil
 }
@@ -47,7 +47,7 @@ func Test() error {
 
 // Check if queue is available
 func availQueue(s Server) bool {
-	if cap(s.Queue) - len(s.Queue) <= s.SkipQueue {
+	if cap(s.Queue)-len(s.Queue) <= s.SkipQueue {
 		return false
 	}
 	return true
@@ -60,9 +60,9 @@ func Add(cmd string, msgid string) {
 	hash.Write([]byte(msgid))
 
 	j := Job{
-		Added: time.Now(),
-		Hash: hash.Sum(nil),
-		Type: cmdType[cmd],
+		Added:  time.Now(),
+		Hash:   hash.Sum(nil),
+		Type:   cmdType[cmd],
 		Update: make(chan string, 1),
 	}
 	defer close(j.Update)
@@ -75,7 +75,7 @@ func Add(cmd string, msgid string) {
 	s.Added++
 Processing:
 	for i := 0; i < len(steps); i++ {
-		var serverTimeout <- chan time.Time
+		var serverTimeout <-chan time.Time
 		isQueued := false
 		for _, group := range Q[steps[i]] {
 			valid := false
@@ -110,23 +110,23 @@ Processing:
 		if isQueued {
 			// Now wait for a response
 			select {
-				case reply := <-j.Update:
-					if reply == "DONE" {
-						fmt.Printf("[%s] Finished\n", msgid)
-						done = true
-						s.Success++
-						break Processing
-					} else {
-						fmt.Printf("[%s] Error: %s (trying on next)\n", msgid, reply)
-						s.Error++
-					}
-				case <- serverTimeout:
-					fmt.Printf("[%s] Server Timeout (trying on next)\n", msgid)
-					s.Timeout++
-
-				case <- replyTimeout:
-					fmt.Printf("[%s] Reply timeout (dropping request)\n", msgid)
+			case reply := <-j.Update:
+				if reply == "DONE" {
+					fmt.Printf("[%s] Finished\n", msgid)
+					done = true
+					s.Success++
 					break Processing
+				} else {
+					fmt.Printf("[%s] Error: %s (trying on next)\n", msgid, reply)
+					s.Error++
+				}
+			case <-serverTimeout:
+				fmt.Printf("[%s] Server Timeout (trying on next)\n", msgid)
+				s.Timeout++
+
+			case <-replyTimeout:
+				fmt.Printf("[%s] Reply timeout (dropping request)\n", msgid)
+				break Processing
 			}
 		}
 

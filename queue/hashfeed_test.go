@@ -1,8 +1,8 @@
 package queue
 
 import (
-	"testing"
 	"crypto/md5"
+	"testing"
 )
 
 // https://github.com/jpmens/diablo/blob/master/lib/hashfeed.c#L223

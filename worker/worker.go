@@ -1,10 +1,10 @@
 package worker
 
 import (
-	"rqueue/config"
-	"rqueue/queue"
 	"fmt"
 	"math/rand"
+	"rqueue/config"
+	"rqueue/queue"
 	"time"
 )
 
@@ -29,19 +29,19 @@ func newConnection(q chan queue.Job) {
 	for {
 		// todo
 		select {
-			case job := <-q:
-				fmt.Printf("Process %+v\n", job)
-				// Done!
-				rnd := r.Intn(3)
-				if rnd == 0 {
-					// Ok
-					job.Update <- "DONE"
-				} else if rnd == 1 {
-					// err reply
-					job.Update <- "ERR"
-				} else if rnd == 2 {
-					// timeout, do nothing and wait
-				}
+		case job := <-q:
+			fmt.Printf("Process %+v\n", job)
+			// Done!
+			rnd := r.Intn(3)
+			if rnd == 0 {
+				// Ok
+				job.Update <- "DONE"
+			} else if rnd == 1 {
+				// err reply
+				job.Update <- "ERR"
+			} else if rnd == 2 {
+				// timeout, do nothing and wait
+			}
 		}
 	}
 }

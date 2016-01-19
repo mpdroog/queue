@@ -14,17 +14,17 @@ func (q QueueType) String() string {
 	if q == Header {
 		return "header"
 	}
-	if q  == Post {
+	if q == Post {
 		return "post"
 	}
 	panic("Invalid QueueType")
 }
 
 const (
-	_ = iota
-	Storage     QueueType = iota
-	Header      QueueType = iota
-	Post        QueueType = iota
+	_                 = iota
+	Storage QueueType = iota
+	Header  QueueType = iota
+	Post    QueueType = iota
 )
 
 // convert cmd to type
@@ -34,9 +34,9 @@ var cmdType map[string]QueueType = map[string]QueueType{
 
 type Job struct {
 	Added time.Time
-	Hash []byte
+	Hash  []byte
 
-	Type QueueType
+	Type   QueueType
 	Server int
 
 	Update chan string

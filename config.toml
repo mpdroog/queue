@@ -42,5 +42,5 @@
 
 [queues]
 	[queues.storage]
-		ReplyTimeout="20s"
+		ReplyTimeout="50s"
 		Steps=["storage", "xsnews", "highwinds", "archive"]

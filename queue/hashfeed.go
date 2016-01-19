@@ -1,23 +1,23 @@
 package queue
 
 import (
-	"fmt"
 	"encoding/binary"
+	"fmt"
 )
 
 // https://github.com/mpdroog/hash
 type ServerHashfeed struct {
-	From uint32
-	To uint32
-	Base uint32
+	From   uint32
+	To     uint32
+	Base   uint32
 	Offset int
 }
 
 func (s *ServerHashfeed) Match(digest []byte) bool {
-	begin := 16-s.Offset-4
+	begin := 16 - s.Offset - 4
 	pos := binary.BigEndian.Uint32(digest[begin:])
 
-	modulo := pos % s.Base +1
+	modulo := pos%s.Base + 1
 	if modulo >= s.From && modulo <= s.To {
 		return true
 	}

@@ -1,32 +1,32 @@
 package config
 
 import (
-	"time"
-	"os"
 	"github.com/BurntSushi/toml"
+	"os"
+	"time"
 )
 
 type Server struct {
-	Type string
-	Hostname string
-	Hashfeed string
+	Type        string
+	Hostname    string
+	Hashfeed    string
 	Connections int
-	Queue int
-	Timeout string
-	SkipQueue int
+	Queue       int
+	Timeout     string
+	SkipQueue   int
 }
 type Queues struct {
-	Steps []string
-	ReplyTimeout string
+	Steps         []string
+	ReplyTimeout  string
 	ReplyTimeoutD time.Duration
 }
 type Config struct {
 	Servers map[string]Server
-	Queues map[string]Queues
+	Queues  map[string]Queues
 }
 
 var (
-	C Config
+	C       Config
 	Verbose bool
 	Timeout time.Duration
 )
