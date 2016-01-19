@@ -9,14 +9,23 @@ import (
 	"flag"
 	"os"
 	"bufio"
+	"runtime"
 )
 
 func main() {
-	var conf string
-	var test string
+	var (
+		conf string
+		test string
+		nCPU int
+	)
 	flag.StringVar(&conf, "c", "./config.toml", "Path to config file")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose")
+	flag.IntVar(&nCPU, "n", 1, "Maxprocs (N-system threads)")
 	flag.Parse()
+
+	max := runtime.NumCPU()
+	runtime.GOMAXPROCS(nCPU)
+	fmt.Printf("Number of CPUs: %d/%d\n", nCPU, max)
 
 	test = flag.Arg(0)
 	if test == "" {
