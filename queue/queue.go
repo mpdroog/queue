@@ -75,23 +75,16 @@ Processing:
 	for i := 0; i < len(steps); i++ {
 		var serverTimeout <- chan time.Time
 		for _, group := range Q[steps[i]] {
+			valid := false
 			if group.Hashfeed != nil {
 				if group.Hashfeed.Match(j.Hash) {
-					if availQueue(group) {
-						fmt.Printf("[%s][%s] Try\n", msgid, group.Hostname)
-						group.Queue <- j
-						j.Server = i
-
-						serverTimeout = time.After(group.Timeout)
-
-						// We used 'for' to 'randomly' pick a server
-						// from the group
-						break
-					} else {
-						fmt.Printf("[%s][%s] Queue too full\n", msgid, group.Hostname)
-					}
+					valid = true
 				}
 			} else {
+				valid = true
+			}
+
+			if valid {
 				if availQueue(group) {
 					fmt.Printf("[%s][%s] Try\n", msgid, group.Hostname)
 					group.Queue <- j
