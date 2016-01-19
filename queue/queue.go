@@ -6,10 +6,12 @@ import (
 	"rqueue/config"
 	"fmt"
 	"strings"
+	"sync"
 )
 
 var (
 	Q map[string][]Server
+	wg sync.WaitGroup
 )
 
 func init() {
@@ -69,6 +71,7 @@ func Add(cmd string, msgid string) {
 	replyTimeout := time.After(config.C.Queues[j.Type.String()].ReplyTimeoutD)
 	steps := config.C.Queues[j.Type.String()].Steps
 
+	wg.Add(1)
 Processing:
 	for i := 0; i < len(steps); i++ {
 		var serverTimeout <- chan time.Time
@@ -127,5 +130,11 @@ Processing:
 	if !done {
 		fmt.Printf("[%s] Client cmd lost\n", msgid)
 	}
+	wg.Done()
+}
 
+// Wait until all done
+// useful in closing routine.
+func Wait() {
+	wg.Wait()
 }
